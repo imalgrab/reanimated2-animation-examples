@@ -2,13 +2,9 @@ import React, {useState} from 'react';
 import {StyleSheet, SafeAreaView, Dimensions} from 'react-native';
 import {Switch} from 'react-native-gesture-handler';
 import Animated, {
-  Extrapolate,
-  interpolate,
   interpolateColor,
   useAnimatedStyle,
   useDerivedValue,
-  withRepeat,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
