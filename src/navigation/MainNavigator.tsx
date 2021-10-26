@@ -5,6 +5,7 @@ import GestureHandler from '../screens/GestureHandler';
 import InterpolateScrollView from '../screens/InterpolateScrollView';
 import ColorsInterpolation from '../screens/ColorsInterpolation';
 import PinchGesture from '../screens/PinchGesture';
+import DoubleTapGesture from '../screens/DoubleTapGesture';
 
 const Drawer = createDrawerNavigator();
 
@@ -22,6 +23,7 @@ const MainNavigator = () => {
         component={ColorsInterpolation}
       />
       <Drawer.Screen name="Pinch gesture" component={PinchGesture} />
+      <Drawer.Screen name="Double tap gesture" component={DoubleTapGesture} />
     </Drawer.Navigator>
   );
 };
