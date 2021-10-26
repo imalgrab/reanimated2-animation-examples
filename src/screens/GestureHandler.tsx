@@ -19,7 +19,7 @@ type PositionContext = {
 const SIZE = 100.0;
 const CIRCLE_RADIUS = 2 * SIZE - 10;
 
-const GestureHandler = () => {
+const GestureHandler: React.FC = () => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 

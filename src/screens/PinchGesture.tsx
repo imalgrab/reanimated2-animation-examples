@@ -14,7 +14,7 @@ import Animated, {
 const {width, height} = Dimensions.get('window');
 const IMG_SOURCE = '../../assets/shrimp.jpg';
 
-export default function PinchGesture() {
+const PinchGesture: React.FC = () => {
   const scale = useSharedValue(1);
   const focalX = useSharedValue(0);
   const focalY = useSharedValue(0);
@@ -71,7 +71,7 @@ export default function PinchGesture() {
       </PinchGestureHandler>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   flex1: {
@@ -95,3 +95,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
+export default PinchGesture;
