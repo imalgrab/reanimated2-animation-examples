@@ -6,6 +6,7 @@ import InterpolateScrollView from '../screens/InterpolateScrollView';
 import ColorsInterpolation from '../screens/ColorsInterpolation';
 import PinchGesture from '../screens/PinchGesture';
 import DoubleTapGesture from '../screens/DoubleTapGesture';
+import ColorPickerAnimation from '../screens/ColorPickerAnimation';
 
 const Drawer = createDrawerNavigator();
 
@@ -24,6 +25,10 @@ const MainNavigator = () => {
       />
       <Drawer.Screen name="Pinch gesture" component={PinchGesture} />
       <Drawer.Screen name="Double tap gesture" component={DoubleTapGesture} />
+      <Drawer.Screen
+        name="Color picker animation"
+        component={ColorPickerAnimation}
+      />
     </Drawer.Navigator>
   );
 };
