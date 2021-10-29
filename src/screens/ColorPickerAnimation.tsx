@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, Dimensions} from 'react-native';
+import {PanGestureHandler} from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,12 +26,25 @@ const COLORS = [
 
 const BACKGROUND_COLOR = 'rgba(1,1,1,.6)';
 
+const parseColorToHex = (androidColor: string | number) => {
+  if (typeof androidColor === 'number') {
+    return `#${androidColor.toString(16).substr(2)}`;
+  }
+  return androidColor;
+};
+
 interface ColorPickerAnimationProps {}
 
 const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
   const pickedColor = useSharedValue<string | number>(COLORS[0]);
 
   const circleAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: pickedColor.value,
+    };
+  });
+
+  const labelAnimatedStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: pickedColor.value,
     };
@@ -44,6 +58,13 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
     <View style={styles.container}>
       <View style={styles.top}>
         <Animated.View style={[styles.circle, circleAnimatedStyle]} />
+        <PanGestureHandler>
+          <Animated.View style={[styles.colorLabel, labelAnimatedStyle]}>
+            <Animated.Text style={styles.colorText}>
+              {parseColorToHex(pickedColor.value)}
+            </Animated.Text>
+          </Animated.View>
+        </PanGestureHandler>
       </View>
 
       <View style={styles.bottom}>
@@ -87,6 +108,17 @@ const styles = StyleSheet.create({
     shadowRadius: 30,
     shadowOpacity: 0.1,
     elevation: 8,
+  },
+  colorLabel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    marginTop: 20,
+    paddingTop: 10,
+  },
+  colorText: {
+    fontSize: 24,
+    fontStyle: 'italic',
   },
 });
 export default ColorPickerAnimation;
