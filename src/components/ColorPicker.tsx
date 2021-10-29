@@ -31,9 +31,15 @@ type PositionContext = {
 
 interface ColorPickerProps extends LinearGradientProps {
   colors: string[];
+  onColorChanged: (color: string | number) => void;
 }
 
-const ColorPicker: React.FC<ColorPickerProps> = ({colors, start, end}) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({
+  colors,
+  start,
+  end,
+  onColorChanged,
+}) => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -61,6 +67,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({colors, start, end}) => {
       inputRange,
       colors,
     );
+    onColorChanged(backgroundColor);
     return {
       backgroundColor,
     };
