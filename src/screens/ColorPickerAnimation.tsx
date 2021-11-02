@@ -1,16 +1,13 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, Dimensions} from 'react-native';
-import {PanGestureHandler} from 'react-native-gesture-handler';
+import {TapGestureHandler} from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   useWorkletCallback,
 } from 'react-native-reanimated';
 import ColorPicker from '../components/ColorPicker';
-
-const {width} = Dimensions.get('window');
-
-const CIRCLE_SIZE = width * 0.8;
 
 const COLORS = [
   'red',
@@ -26,17 +23,30 @@ const COLORS = [
 
 const BACKGROUND_COLOR = 'rgba(1,1,1,.6)';
 
-const parseColorToHex = (androidColor: string | number) => {
-  if (typeof androidColor === 'number') {
-    return `#${androidColor.toString(16).substr(2)}`;
+const {width} = Dimensions.get('window');
+
+const CIRCLE_SIZE = width * 0.8;
+
+type Color = string | number;
+
+const parseColorToHex = (color: Color) => {
+  'worklet';
+  if (typeof color === 'number') {
+    return `#${color.toString(16).substr(2)}`;
   }
-  return androidColor;
+  return color;
 };
 
 interface ColorPickerAnimationProps {}
 
 const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
-  const pickedColor = useSharedValue<string | number>(COLORS[0]);
+  const pickedColor = useSharedValue<Color>(COLORS[0]);
+  const [colorName, setColorName] = useState<Color>(COLORS[0]);
+
+  const handleColorChanged = useWorkletCallback((color: Color) => {
+    pickedColor.value = color;
+    runOnJS(setColorName)(parseColorToHex(color));
+  }, []);
 
   const circleAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -50,21 +60,15 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
     };
   });
 
-  const handleColorChanged = useWorkletCallback((color: string | number) => {
-    pickedColor.value = color;
-  }, []);
-
   return (
     <View style={styles.container}>
       <View style={styles.top}>
         <Animated.View style={[styles.circle, circleAnimatedStyle]} />
-        <PanGestureHandler>
-          <Animated.View style={[styles.colorLabel, labelAnimatedStyle]}>
-            <Animated.Text style={styles.colorText}>
-              {parseColorToHex(pickedColor.value)}
-            </Animated.Text>
-          </Animated.View>
-        </PanGestureHandler>
+        <Animated.View style={[styles.colorLabel, labelAnimatedStyle]}>
+          <TapGestureHandler>
+            <Animated.Text style={styles.colorText}>{colorName}</Animated.Text>
+          </TapGestureHandler>
+        </Animated.View>
       </View>
 
       <View style={styles.bottom}>
@@ -103,10 +107,10 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 10,
     },
-    shadowRadius: 30,
-    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOpacity: 0.3,
     elevation: 8,
   },
   colorLabel: {
