@@ -3,6 +3,8 @@ import {Dimensions, StyleSheet} from 'react-native';
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
+  TapGestureHandler,
+  TapGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import LinearGradient, {
   LinearGradientProps,
@@ -13,7 +15,9 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  useWorkletCallback,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 const {width} = Dimensions.get('window');
@@ -67,46 +71,61 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
       inputRange,
       colors,
     );
+
     onColorChanged(backgroundColor);
+
     return {
       backgroundColor,
     };
   });
 
-  const onDrag = useAnimatedGestureHandler<
+  const onEnd = useWorkletCallback(() => {
+    translateY.value = withSpring(0);
+    scale.value = withSpring(1);
+  }, [scale, translateY]);
+
+  const handleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
+    onStart: event => {
+      translateY.value = withSpring(-CIRCLE_PICKER_SIZE);
+      scale.value = withSpring(1.2);
+      translateX.value = withTiming(event.absoluteX - CIRCLE_PICKER_SIZE);
+    },
+    onEnd,
+  });
+
+  const handleDrag = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
     PositionContext
   >({
     onStart: (_, context) => {
       context.translateX = adjustedTranslateX.value;
-      translateY.value = withSpring(-CIRCLE_PICKER_SIZE);
-      scale.value = withSpring(1.5);
     },
     onActive: (event, context) => {
       translateX.value = event.translationX + context.translateX;
     },
-    onEnd: () => {
-      translateY.value = withSpring(0);
-      scale.value = withSpring(1);
-    },
+    onEnd,
   });
 
   return (
-    <PanGestureHandler onGestureEvent={onDrag}>
-      <Animated.View style={styles.container}>
-        <LinearGradient
-          style={styles.gradient}
-          colors={colors}
-          start={start}
-          end={end}
-        />
-        <Animated.View style={[styles.picker, pickerAnimatedStyle]}>
-          <Animated.View
-            style={[styles.innerPicker, innerPickerAnimatedStyle]}
-          />
-        </Animated.View>
+    <TapGestureHandler onGestureEvent={handleTap}>
+      <Animated.View>
+        <PanGestureHandler onGestureEvent={handleDrag}>
+          <Animated.View style={styles.container}>
+            <LinearGradient
+              style={styles.gradient}
+              colors={colors}
+              start={start}
+              end={end}
+            />
+            <Animated.View style={[styles.picker, pickerAnimatedStyle]}>
+              <Animated.View
+                style={[styles.innerPicker, innerPickerAnimatedStyle]}
+              />
+            </Animated.View>
+          </Animated.View>
+        </PanGestureHandler>
       </Animated.View>
-    </PanGestureHandler>
+    </TapGestureHandler>
   );
 };
 
