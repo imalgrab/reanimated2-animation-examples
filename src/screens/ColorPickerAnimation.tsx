@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, Dimensions} from 'react-native';
+import {View, StyleSheet, Dimensions, Text} from 'react-native';
 import {
   TapGestureHandler,
   TapGestureHandlerGestureEvent,
@@ -10,6 +10,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   useWorkletCallback,
+  withTiming,
 } from 'react-native-reanimated';
 import ColorPicker from '../components/ColorPicker';
 
@@ -48,6 +49,8 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
   const [colorName, setColorName] = useState<Color>(COLORS[0]);
   const [fontColor, setFontColor] = useState<Color>('#000');
 
+  const opacity = useSharedValue(0);
+
   const handleBrightnessChange = (color: Color) => {
     const hexColor = parseColorToHex(color);
     const rgbColor = parseInt(hexColor.substr(1), 16);
@@ -67,9 +70,13 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
 
   const handleColorNameTap =
     useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-      onStart: () => {},
+      onStart: () => {
+        opacity.value = 1;
+      },
       onActive: () => {},
-      onEnd: () => {},
+      onEnd: () => {
+        opacity.value = withTiming(0, {duration: 2000});
+      },
     });
 
   const circleAnimatedStyle = useAnimatedStyle(() => {
@@ -84,6 +91,11 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
     };
   });
 
+  const toastAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
   const labelTextAnimatedStyle = useAnimatedStyle(() => {
     return {
       color: fontColor,
@@ -94,13 +106,18 @@ const ColorPickerAnimation: React.FC<ColorPickerAnimationProps> = () => {
     <View style={styles.container}>
       <View style={styles.top}>
         <Animated.View style={[styles.circle, circleAnimatedStyle]} />
-        <Animated.View style={[styles.colorLabel, labelAnimatedStyle]}>
-          <TapGestureHandler onGestureEvent={handleColorNameTap}>
-            <Animated.Text style={[styles.colorText, labelTextAnimatedStyle]}>
-              {colorName}
-            </Animated.Text>
-          </TapGestureHandler>
-        </Animated.View>
+        <TapGestureHandler onGestureEvent={handleColorNameTap}>
+          <Animated.View>
+            <Animated.View style={[styles.colorLabel, labelAnimatedStyle]}>
+              <Animated.Text style={[styles.colorText, labelTextAnimatedStyle]}>
+                {colorName}
+              </Animated.Text>
+            </Animated.View>
+            <Animated.View style={[styles.toast, toastAnimatedStyle]}>
+              <Text style={styles.toastLabel}>Copied to clipboard!</Text>
+            </Animated.View>
+          </Animated.View>
+        </TapGestureHandler>
       </View>
 
       <View style={styles.bottom}>
@@ -155,6 +172,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontStyle: 'italic',
     textDecorationLine: 'underline',
+  },
+  toast: {
+    padding: 20,
+    backgroundColor: 'gray',
+    borderRadius: 30,
+    marginTop: 10,
+  },
+  toastLabel: {
+    fontSize: 18,
+    color: '#fff',
   },
 });
 export default ColorPickerAnimation;
